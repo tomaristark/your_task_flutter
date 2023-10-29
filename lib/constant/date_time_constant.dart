@@ -11,3 +11,4 @@ TimeOfDay kNowTime = TimeOfDay.now();
 
 
 String kFormatDate = "";
+String kFormatSelectDate ="";

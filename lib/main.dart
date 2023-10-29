@@ -5,7 +5,7 @@ import 'package:your_task_flutter/persistent/dao/pref_instance.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  await PrefInstance.createSharePrefrenceInstance();
+  await PrefInstance.createSharePreferenceInstance();
   runApp(const MyApp());
 }
 

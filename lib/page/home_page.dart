@@ -9,6 +9,8 @@ import 'package:your_task_flutter/constant/color.dart';
 import 'package:your_task_flutter/constant/date_time_constant.dart';
 import 'package:your_task_flutter/constant/dimen.dart';
 import 'package:your_task_flutter/constant/string.dart';
+import 'package:your_task_flutter/data/model/todo_model.dart';
+import 'package:your_task_flutter/data/vo/todo_vo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -113,9 +115,10 @@ class BottomSheet extends StatefulWidget {
 class _BottomSheetState extends State<BottomSheet> {
     String _taskName ="";
     String _description ="";
-    String _formatSelectDate = "";
     String _selectTime ="";
      bool   _isImportant = false;
+     List<ToDoVO> todoList =[];
+     final TodoModel _todoModel = TodoModel();
     
 
 
@@ -178,7 +181,7 @@ class _BottomSheetState extends State<BottomSheet> {
               ),
               borderRadius: BorderRadius.circular(kSP25x)
             ),
-            child: Text(_formatSelectDate),
+            child: Text(kFormatSelectDate),
           ),
         
          GestureDetector(
@@ -264,9 +267,15 @@ class _BottomSheetState extends State<BottomSheet> {
             child: Center(
               child: ElevatedButton(
                 onPressed: (){
+                  setState(() {
+                      todoList.add(ToDoVO(_taskName, _description, kFormatSelectDate, _selectTime, isImportant));
+                      _todoModel.saveList(todoList);
+                  });
+ 
+                 
                   Navigator.of(context).pop();
                 }, 
-              child: Text(kSave),
+              child: const Text(kSave),
               style: ButtonStyle(
                 minimumSize: MaterialStateProperty.all(Size(MediaQuery.of(context).size.width,MediaQuery.of(context).size.width*0.1)),
                 padding: MaterialStateProperty.all(EdgeInsets.all(kSP10x)),
@@ -302,8 +311,8 @@ class _BottomSheetState extends State<BottomSheet> {
      firstDate: kStartDate, 
      lastDate: kEndDate).then((value) {
       setState(() {
-        _formatSelectDate=DateFormat('dd-MM-yyyy').format(value!);
-        print(_formatSelectDate);
+        kFormatSelectDate=DateFormat('dd-MM-yyyy').format(value!);
+        print(kFormatSelectDate);
       });
      });
 }
@@ -358,56 +367,69 @@ class TaskSessionView extends StatefulWidget {
   @override
   State<TaskSessionView> createState() => _TaskSessionViewState();
 }
-
+  final TodoModel _todoModel = TodoModel();
+  List <ToDoVO> ? todoList = _todoModel.getList();
   bool isImportant = false;
 class _TaskSessionViewState extends State<TaskSessionView> {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        controller: widget.scrollController,
-        itemCount: 10,
-        itemBuilder: (context, index) {
-          return 
-          Dismissible(key: const Key("task"), 
-          background: Container(
-            color: kJobDoneDismissible,
-            alignment: Alignment.centerLeft,
-          ),
-          secondaryBackground: Container(
-            color: kJobRemoveDismissible,
-            alignment: Alignment.centerRight,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: kSP10x,horizontal: kSP5x),
-            child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kSP10x)),
-              child: ListTile(
-                contentPadding: EdgeInsets.all(kSP10x),
-                title:  Padding(
-                  padding: EdgeInsets.symmetric(vertical: kSP10x),
-                  child: Text("Your Task Name"),
-                ),
-                subtitle: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Date:12/31/23"),
-                    Text("Time:12:10PM")
-                  ],
-                ),
-                trailing: GestureDetector(
-                  onTap: (){
-                      setState(() {
-                        isImportant = true;
-                      });
-                  },
-                  child: isImportant ? const Icon(Icons.star,color:kIsImportantIconColor ,):
-                  const Icon(Icons.star_border_outlined)
-                  ),
+    return StreamBuilder(
+      stream: _todoModel.getTodoStream,
+      builder: (context, snapshot) {
+        if(snapshot.connectionState ==ConnectionState.waiting){
+         return const  CircularProgressIndicator();
+        }
+        if(snapshot.hasError){
+          return Text(snapshot.error.toString());
+        }
+
+        return ListView.builder(
+            controller: widget.scrollController,
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              return 
+              Dismissible(key: const Key("task"), 
+              background: Container(
+                color: kJobDoneDismissible,
+                alignment: Alignment.centerLeft,
               ),
-            )
-          ),
-          );
-        });
+              secondaryBackground: Container(
+                color: kJobRemoveDismissible,
+                alignment: Alignment.centerRight,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: kSP10x,horizontal: kSP5x),
+                child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kSP10x)),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(kSP10x),
+                    title:  Padding(
+                      padding: EdgeInsets.symmetric(vertical: kSP10x),
+                      child: Text(snapshot.data![index].taskName),
+                    ),
+                    subtitle: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(snapshot.data![index].date),
+                        Text(snapshot.data![index].time)
+                      ],
+                    ),
+                    trailing: IconButton(
+                      onPressed: (){
+                          setState(() {
+                            !(snapshot.data![index].isImportant);
+                          });
+                      },
+                      icon: snapshot.data![index].isImportant ? const Icon(Icons.star,color:kIsImportantIconColor ,):
+                      const Icon(Icons.star_border_outlined)
+                      ),
+                  ),
+                )
+              ),
+              );
+            });
+      }
+    );
   }
 }
 

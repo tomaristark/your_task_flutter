@@ -5,7 +5,7 @@ class PrefInstance{
 
   static SharedPreferences get getSharePreferences => _sharedPreferences;
 
-  static Future<void> createSharePrefrenceInstance() async{
+  static Future<void> createSharePreferenceInstance() async{
     _sharedPreferences= await SharedPreferences.getInstance();
     return Future.value();
   }
