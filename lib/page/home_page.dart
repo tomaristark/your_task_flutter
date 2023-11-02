@@ -12,6 +12,7 @@ import 'package:your_task_flutter/constant/string.dart';
 import 'package:your_task_flutter/data/model/todo_model.dart';
 import 'package:your_task_flutter/data/vo/todo_vo.dart';
 
+final TodoModel _todoModel = TodoModel();
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -117,8 +118,8 @@ class _BottomSheetState extends State<BottomSheet> {
     String _description ="";
     String _selectTime ="";
      bool   _isImportant = false;
-     List<ToDoVO> todoList =[];
-     final TodoModel _todoModel = TodoModel();
+     
+     
     
 
 
@@ -268,11 +269,10 @@ class _BottomSheetState extends State<BottomSheet> {
               child: ElevatedButton(
                 onPressed: (){
                   setState(() {
-                      todoList.add(ToDoVO(_taskName, _description, kFormatSelectDate, _selectTime, isImportant));
-                      _todoModel.saveList(todoList);
+                      // todoList.add(ToDoVO(_taskName, _description, kFormatSelectDate, _selectTime, isImportant));
+                      // _todoModel.saveList(todoList);
+                      _todoModel.saveTask(ToDoVO(_taskName, _description, kFormatSelectDate, _selectTime, _isImportant));
                   });
- 
-                 
                   Navigator.of(context).pop();
                 }, 
               child: const Text(kSave),
@@ -367,25 +367,26 @@ class TaskSessionView extends StatefulWidget {
   @override
   State<TaskSessionView> createState() => _TaskSessionViewState();
 }
-  final TodoModel _todoModel = TodoModel();
-  List <ToDoVO> ? todoList = _todoModel.getList();
-  bool isImportant = false;
+  
+  List <ToDoVO> ? _todoList = _todoModel.getTaskList;
+ 
 class _TaskSessionViewState extends State<TaskSessionView> {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: _todoModel.getTodoStream,
-      builder: (context, snapshot) {
-        if(snapshot.connectionState ==ConnectionState.waiting){
-         return const  CircularProgressIndicator();
-        }
-        if(snapshot.hasError){
-          return Text(snapshot.error.toString());
-        }
+    // return StreamBuilder(
+    //   stream: _todoModel.getTodoStream,
+    //   builder: (context, snapshot) {
+    //     if(snapshot.connectionState ==ConnectionState.waiting){
+    //      return const  CircularProgressIndicator();
+    //     }
+    //     if(snapshot.hasError){
+    //       return Text(snapshot.error.toString());
+    //     }
 
-        return ListView.builder(
+        return (_todoList == null)? const CircularProgressIndicator()
+         :ListView.builder(
             controller: widget.scrollController,
-            itemCount: snapshot.data!.length,
+            itemCount: _todoList!.length,
             itemBuilder: (context, index) {
               return 
               Dismissible(key: const Key("task"), 
@@ -405,22 +406,22 @@ class _TaskSessionViewState extends State<TaskSessionView> {
                     contentPadding: EdgeInsets.all(kSP10x),
                     title:  Padding(
                       padding: EdgeInsets.symmetric(vertical: kSP10x),
-                      child: Text(snapshot.data![index].taskName),
+                      child: Text(_todoList![index].taskName.toString()),
                     ),
                     subtitle: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(snapshot.data![index].date),
-                        Text(snapshot.data![index].time)
+                        Text(_todoList![index].date.toString()),
+                        Text(_todoList![index].time.toString())
                       ],
                     ),
                     trailing: IconButton(
                       onPressed: (){
-                          setState(() {
-                            !(snapshot.data![index].isImportant);
-                          });
+                          // setState(() {
+                          //   !(_todoList![index].isImportant);
+                          // });
                       },
-                      icon: snapshot.data![index].isImportant ? const Icon(Icons.star,color:kIsImportantIconColor ,):
+                      icon: _todoList![index].isImportant ? const Icon(Icons.star,color:kIsImportantIconColor ,):
                       const Icon(Icons.star_border_outlined)
                       ),
                   ),
@@ -429,9 +430,8 @@ class _TaskSessionViewState extends State<TaskSessionView> {
               );
             });
       }
-    );
   }
-}
+
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
