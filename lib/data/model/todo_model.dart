@@ -26,6 +26,10 @@ class TodoModel{
 
   List<ToDoVO> ? get getTaskList => _toDoDAO.getTaskList;
 
+  void deleteTask(int index){
+    _toDoDAO.deleteTask(index);
+  }
+
 
   // List<ToDoVO>?getList() => _toDoDAO.getFromList() ?? [];
 }
