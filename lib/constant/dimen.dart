@@ -7,6 +7,7 @@ const double kSP5x = 5;
 const double kSP10x =10;
 const double kSP15x = 15;
 const double kSP25x = 25;
+const double kSP150x = 150;
 
 
 //
