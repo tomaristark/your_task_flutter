@@ -1,6 +1,7 @@
 import 'package:backdrop/backdrop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:your_task_flutter/constant/color.dart';
@@ -83,29 +84,40 @@ class _HomePageState extends State<HomePage> {
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _isVisible
-          ? BottomAppBar(
+          ? const BottomAppBar(
               notchMargin: kNotchMargin,
               color: kPrimaryColor,
-              shape: const CircularNotchedRectangle(),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.checklist_rtl_outlined,
-                        color: kSecondaryColor,
-                      )),
-                  IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.event_note_outlined,
-                        color: kSecondaryColor,
-                      )),
-                ],
-              ),
+              shape:  CircularNotchedRectangle(),
+              child: BottomNavItem(),
             )
           : null,
+    );
+  }
+}
+
+class BottomNavItem extends StatelessWidget {
+  const BottomNavItem({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.checklist_rtl_outlined,
+              color: kSecondaryColor,
+            )),
+        IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.event_note_outlined,
+              color: kSecondaryColor,
+            )),
+      ],
     );
   }
 }
@@ -159,7 +171,7 @@ class _BottomSheetState extends State<BottomSheet> {
                   size: kCloseIconSize,
                 )),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              padding: const EdgeInsets.symmetric(vertical: kSP10x, horizontal: kSP15x),
               child: TaskFieldWidget(
                 maxLines: 1,
                 taskName: kTaskName,
@@ -182,128 +194,25 @@ class _BottomSheetState extends State<BottomSheet> {
                     },
                   )),
             ),
-            Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: kSP10x, horizontal: kSP15x),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      height: kDateAndTimePickerHeight,
-                      width: kDateAndTimePickerWidth,
-                      decoration: BoxDecoration(
-                          border: Border.all(color: kPrimaryColor),
-                          borderRadius: BorderRadius.circular(kSP25x)),
-                      child: Text(kFormatSelectDate),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        _showDatePicker(context);
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        width: kDateAndTimePickerButtonWidth,
-                        height: kDateAndTimePickerButtonHeight,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(kSP25x),
-                          color: kPrimaryColor,
-                        ),
-                        child: const Text(
-                          kSelectDate,
-                          style: TextStyle(color: kPrimaryTextColor),
-                        ),
-                      ),
-                    )
-                  ],
-                )),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  vertical: kSP10x, horizontal: kSP15x),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    height: kDateAndTimePickerHeight,
-                    width: kDateAndTimePickerWidth,
-                    decoration: BoxDecoration(
-                        border: Border.all(color: kPrimaryColor),
-                        borderRadius: BorderRadius.circular(kSP25x)),
-                    child: Text(_selectTime),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      _showTimePicker(context);
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: kDateAndTimePickerButtonWidth,
-                      height: kDateAndTimePickerButtonHeight,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(kSP25x),
-                        color: kPrimaryColor,
-                      ),
-                      child: const Text(
-                        kSelectTime,
-                        style: TextStyle(color: kPrimaryTextColor),
-                      ),
-                    ),
-                  )
-                ],
-              ),
+            PickDateView(date: kFormatSelectDate,onTap: ()=> _showDatePicker(context),),
+            PickTimeView(time:_selectTime,onTap:()=> _showTimePicker(context)),
+            IsImportantCheckBoxView(
+                checkBox: Checkbox(
+                    value: _isImportant,
+                    onChanged: (value) {
+                      setState(() {
+                        _isImportant = value!;
+                      });
+                    })
             ),
-            Center(
-              child: Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: kSP5x),
-                height: kIsImportantHeight,
-                width: kIsImportantWidth,
-                decoration: BoxDecoration(
-                    color: kPrimaryColor,
-                    borderRadius: BorderRadius.circular(kSP25x)),
-                child: Row(
-                  children: [
-                    const Text(
-                      kIsImportant,
-                      style: TextStyle(color: kPrimaryTextColor),
-                    ),
-                    Checkbox(
-                        value: _isImportant,
-                        onChanged: (value) {
-                          setState(() {
-                            _isImportant = value!;
-                            print(_isImportant);
-                          });
-                        })
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _todoModel.saveTask(ToDoVO(_taskName, _description,
-                          kFormatSelectDate, _selectTime, _isImportant));
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  style: ButtonStyle(
-                      minimumSize: MaterialStateProperty.all(Size(
-                          MediaQuery.of(context).size.width,
-                          MediaQuery.of(context).size.width * 0.1)),
-                      padding:
-                          MaterialStateProperty.all(const EdgeInsets.all(kSP10x)),
-                      shape: MaterialStateProperty.all(
-                        RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(kSP25x)),
-                      )),
-                  child: const Text(kSave),
-                ),
-              ),
+            SaveButtonView(
+              onPressed: (){
+                setState(() {
+                  _todoModel.saveTask(ToDoVO(_taskName, _description,
+                      kFormatSelectDate, _selectTime, _isImportant));
+                });
+                Navigator.of(context).pop();
+              },
             )
           ],
         ),
@@ -330,6 +239,164 @@ class _BottomSheetState extends State<BottomSheet> {
         kFormatSelectDate = DateFormat('dd-MM-yyyy').format(value!);
       });
     });
+  }
+}
+
+class SaveButtonView extends StatelessWidget {
+  const SaveButtonView({
+    super.key, required this.onPressed,
+  });
+  final Function onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      child: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            onPressed();
+          },
+          style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(Size(
+                  MediaQuery.of(context).size.width,
+                  MediaQuery.of(context).size.width * 0.1)),
+              padding:
+                  MaterialStateProperty.all(const EdgeInsets.all(kSP10x)),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(kSP25x)),
+              )),
+          child: const Text(kSave),
+        ),
+      ),
+    );
+  }
+}
+
+class IsImportantCheckBoxView extends StatelessWidget {
+  const IsImportantCheckBoxView({
+    super.key, required this.checkBox,
+  });
+
+  final Widget checkBox;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: kSP5x),
+        height: kIsImportantHeight,
+        width: kIsImportantWidth,
+        decoration: BoxDecoration(
+            color: kPrimaryColor,
+            borderRadius: BorderRadius.circular(kSP25x)),
+        child: Row(
+          children: [
+            const Text(
+              kIsImportant,
+              style: TextStyle(color: kPrimaryTextColor),
+            ),
+           checkBox
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PickTimeView extends StatelessWidget {
+  const PickTimeView({
+    super.key, required this.time, required this.onTap,
+  });
+  final String time;
+  final Function onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          vertical: kSP10x, horizontal: kSP15x),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            alignment: Alignment.center,
+            height: kDateAndTimePickerHeight,
+            width: kDateAndTimePickerWidth,
+            decoration: BoxDecoration(
+                border: Border.all(color: kPrimaryColor),
+                borderRadius: BorderRadius.circular(kSP25x)),
+            child: Text(time),
+          ),
+          GestureDetector(
+            onTap: () {
+              onTap();
+            },
+            child: Container(
+              alignment: Alignment.center,
+              width: kDateAndTimePickerButtonWidth,
+              height: kDateAndTimePickerButtonHeight,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(kSP25x),
+                color: kPrimaryColor,
+              ),
+              child: const Text(
+                kSelectTime,
+                style: TextStyle(color: kPrimaryTextColor),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class PickDateView extends StatelessWidget {
+  const PickDateView({
+    super.key, required this.date, required this.onTap,
+  });
+ final String date;
+ final Function onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(
+            vertical: kSP10x, horizontal: kSP15x),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              height: kDateAndTimePickerHeight,
+              width: kDateAndTimePickerWidth,
+              decoration: BoxDecoration(
+                  border: Border.all(color: kPrimaryColor),
+                  borderRadius: BorderRadius.circular(kSP25x)),
+              child: Text(date),
+            ),
+            GestureDetector(
+              onTap: () {
+                onTap();
+              },
+              child: Container(
+                alignment: Alignment.center,
+                width: kDateAndTimePickerButtonWidth,
+                height: kDateAndTimePickerButtonHeight,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(kSP25x),
+                  color: kPrimaryColor,
+                ),
+                child: const Text(
+                  kSelectDate,
+                  style: TextStyle(color: kPrimaryTextColor),
+                ),
+              ),
+            )
+          ],
+        ));
   }
 }
 
@@ -382,9 +449,19 @@ class _TaskSessionViewState extends State<TaskSessionView> {
                 key: const Key("task"),
                 onDismissed: (direction) {
                   if (direction == DismissDirection.startToEnd) {
+                    Fluttertoast.showToast(msg: "Task Done",
+                        backgroundColor: kPrimaryColor,
+                        gravity: ToastGravity.CENTER
+                    );
                     _todoModel.deleteTask(index);
                   }
-                  if (direction == DismissDirection.endToStart) {}
+                  if (direction == DismissDirection.endToStart) {
+                    Fluttertoast.showToast(msg: "Task Removed",
+                        backgroundColor: kPrimaryColor,
+                        gravity: ToastGravity.CENTER
+                    );
+                    _todoModel.deleteTask(index);
+                  }
                 },
                 background: Container(
                   color: kJobDoneDismissible,
